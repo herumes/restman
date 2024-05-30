@@ -3,7 +3,8 @@
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>RestMan</title>
+        <title>Thoth RestMan</title>
+        
 
         <link rel="stylesheet" href="./css/foundation-5.4.6.css" />
         <link rel="stylesheet" href="./css/codemirror-5.3/codemirror.css">
@@ -62,6 +63,14 @@
                     </div>
                 </div>
                 <span id="Send" class="flex-item-static icon-send" tabindex="0"></span>
+                <div class="export-container flex-item-static">
+                    <span id="ExportButton" class="icon-export" tabindex="0">Export</span>
+                    <div id="ExportOptions" class="export-options">
+                        <div data-export-type="curl">cURL</div>
+                        <div data-export-type="python">Python</div>
+                        <div data-export-type="javascript">JavaScript</div>
+                    </div>
+                </div>
             </div>
             <span id="Options" class="flex-item-static icon-more_vert" data-reveal-id="OptionsForm"></span>
         </header>
@@ -175,7 +184,7 @@
 
         <footer class="flex-item-static page-footer">
             <div class="footer-copyright">
-                <span id="VersionNumber"></span><span>. Made by <a href="http://github.com/jsargiot">Joaquin Sargiotto</a>. MIT License v2.</span>
+                <span id="VersionNumber"></span><span>. Made by <a href="http://github.com/jsargiot">Joaquin Sargiotto</a>. MIT License v2. Forked by <a href="http://github.com/herumes">Thoth</a>.</span>
             </div>
         </footer>
 
@@ -271,6 +280,166 @@
         <script type="text/javascript" src="./js/ui/history.js"></script>
         <script type="text/javascript" src="./js/ui/version.js"></script>
         <script type="text/javascript" src="./js/ui/theme.js"></script>
-
+        <script type="text/javascript">
+            function generateCurlCommand() {
+                const method = document.getElementById('Method').value;
+                const url = document.getElementById('Url').value;
+                const headers = [];
+                const headerElements = document.querySelectorAll('#HeadersTable li:not([data-clone-template])');
+                headerElements.forEach(headerElement => {
+                    const key = headerElement.querySelector('.key').value;
+                    const value = headerElement.querySelector('.value').value;
+                    if (key && value) {
+                        headers.push(`-H "${key}: ${value}"`);
+                    }
+                });
+                
+                let data = '';
+                const bodyPanel = document.querySelector('#PanelRaw').classList.contains('active') ? 'raw' : 'form';
+                if (bodyPanel === 'raw') {
+                    data = document.getElementById('RequestContent').value;
+                } else {
+                    const formDataElements = document.querySelectorAll('#FormData li:not([data-clone-template])');
+                    const formData = [];
+                    formDataElements.forEach(element => {
+                        const key = element.querySelector('.key').value;
+                        const value = element.querySelector('.value').value;
+                        if (key && value) {
+                            formData.push(`${encodeURIComponent(key)}=${encodeURIComponent(value)}`);
+                        }
+                    });
+                    data = formData.join('&');
+                }
+                
+                const curlCommand = [
+                    'curl',
+                    `-X ${method}`,
+                    ...headers,
+                    data ? `-d "${data}"` : '',
+                    `"${url}"`
+                ].join(' ');
+        
+                return curlCommand;
+            }
+        
+            function generatePythonRequest() {
+                const method = document.getElementById('Method').value;
+                const url = document.getElementById('Url').value;
+                const headers = {};
+                const headerElements = document.querySelectorAll('#HeadersTable li:not([data-clone-template])');
+                headerElements.forEach(headerElement => {
+                    const key = headerElement.querySelector('.key').value;
+                    const value = headerElement.querySelector('.value').value;
+                    if (key && value) {
+                        headers[key] = value;
+                    }
+                });
+        
+                let data = '';
+                const bodyPanel = document.querySelector('#PanelRaw').classList.contains('active') ? 'raw' : 'form';
+                if (bodyPanel === 'raw') {
+                    data = document.getElementById('RequestContent').value;
+                } else {
+                    const formDataElements = document.querySelectorAll('#FormData li:not([data-clone-template])');
+                    const formData = {};
+                    formDataElements.forEach(element => {
+                        const key = element.querySelector('.key').value;
+                        const value = element.querySelector('.value').value;
+                        if (key && value) {
+                            formData[key] = value;
+                        }
+                    });
+                    data = JSON.stringify(formData);
+                }
+        
+                const pythonCode = [
+                    'import requests',
+                    '',
+                    `url = "${url}"`,
+                    `method = "${method}"`,
+                    `headers = ${JSON.stringify(headers, null, 4)}`,
+                    `data = ${bodyPanel === 'raw' ? `'''${data}'''` : data}`,
+                    '',
+                    'response = requests.request(method, url, headers=headers, data=data)',
+                    '',
+                    'print(response.text)'
+                ].join('\n');
+        
+                return pythonCode;
+            }
+        
+            function generateJsFetchRequest() {
+                const method = document.getElementById('Method').value;
+                const url = document.getElementById('Url').value;
+                const headers = {};
+                const headerElements = document.querySelectorAll('#HeadersTable li:not([data-clone-template])');
+                headerElements.forEach(headerElement => {
+                    const key = headerElement.querySelector('.key').value;
+                    const value = headerElement.querySelector('.value').value;
+                    if (key && value) {
+                        headers[key] = value;
+                    }
+                });
+        
+                let body = '';
+                const bodyPanel = document.querySelector('#PanelRaw').classList.contains('active') ? 'raw' : 'form';
+                if (bodyPanel === 'raw') {
+                    body = document.getElementById('RequestContent').value;
+                } else {
+                    const formDataElements = document.querySelectorAll('#FormData li:not([data-clone-template])');
+                    const formData = {};
+                    formDataElements.forEach(element => {
+                        const key = element.querySelector('.key').value;
+                        const value = element.querySelector('.value').value;
+                        if (key && value) {
+                            formData[key] = value;
+                        }
+                    });
+                    body = JSON.stringify(formData);
+                }
+        
+                const jsFetchCode = [
+                    'fetch("'+url+'", {',
+                    `    method: "${method}",`,
+                    '    headers: ' + JSON.stringify(headers, null, 4) + ',',
+                    body ? `    body: ${bodyPanel === 'raw' ? `\`${body}\`` : body},` : '',
+                    '})',
+                    '.then(response => response.text())',
+                    '.then(result => console.log(result))',
+                    '.catch(error => console.log("error", error));'
+                ].join('\n');
+        
+                return jsFetchCode;
+            }
+        
+            function copyToClipboard(text) {
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+            }
+        
+            document.querySelectorAll('#ExportOptions div').forEach(option => {
+                option.addEventListener('click', (event) => {
+                    const exportType = event.target.getAttribute('data-export-type');
+                    let exportContent = '';
+                    switch(exportType) {
+                        case 'curl':
+                            exportContent = generateCurlCommand();
+                            break;
+                        case 'python':
+                            exportContent = generatePythonRequest();
+                            break;
+                        case 'javascript':
+                            exportContent = generateJsFetchRequest();
+                            break;
+                    }
+                    copyToClipboard(exportContent);
+                    alert(`${exportType.toUpperCase()} code copied to clipboard!`);
+                });
+            });
+        </script>
     </body>
 </html>

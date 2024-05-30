@@ -1,9 +1,9 @@
 {
   "manifest_version": 2,
-  "name": "RestMan",
-  "author": "Joaquin Sargiotto",
+  "name": "Thoth RestMan",
+  "author": "Joaquin Sargiotto, Thoth",
   "description": "RESTMan is a browser extension to work on http requests.",
-  "version": "0.7.2",
+  "version": "1.0.0",
   "icons": {
     "32": "img/icon32.png",
     "64": "img/icon64.png"
@@ -12,7 +12,7 @@
   "permissions": ["http://*/", "http://*/*", "https://*/", "https://*/*", "storage"],
   "browser_action": {
     "default_icon": "img/icon32.png",
-    "default_title": "RestMan"
+    "default_title": "Thoth RestMan"
   },
   "incognito": "split",
   "content_security_policy": "default-src 'self'; connect-src *; script-src 'self'; style-src 'self' * blob: data: 'unsafe-inline'; img-src 'self' * data:;"

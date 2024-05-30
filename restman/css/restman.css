@@ -25,6 +25,55 @@ body {
   font-weight: 400;
 }
 
+.icon-copy {
+  cursor: pointer;
+  padding: 10px;
+  background: #a59595;
+  border-radius: 3px;
+  margin-left: 5px;
+}
+
+.icon-copy:hover {
+  background: #363636;
+}
+
+.icon-export {
+  cursor: pointer;
+  padding: 10px;
+  background: #bb9f9f;
+  border-radius: 3px;
+  margin-left: 5px;
+  position: relative;
+}
+
+.icon-export:hover {
+  background: #313131;
+}
+
+.export-options {
+  display: none;
+  position: absolute;
+  background: rgb(105, 105, 105);
+  border: 1px solid #ccc;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  margin-top: 5px;
+  padding: 5px 0;
+}
+
+.export-options div {
+  padding: 10px;
+  cursor: pointer;
+}
+
+.export-options div:hover {
+  background: #686868;
+}
+
+.export-container:hover .export-options {
+  display: block;
+}
+
+
 dl {
   line-height: 1.4;
   margin-bottom: 0;
